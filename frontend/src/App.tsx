@@ -6,49 +6,29 @@ import { SweetHubTestimonials } from "./components/SweetHubTestimonials";
 import { SweetHubFAQ } from "./components/SweetHubFAQ";
 import { SweetHubCTA } from "./components/SweetHubCTA";
 import { SweetHubFooter } from "./components/SweetHubFooter";
-import { AuthScreen } from "./components/AuthScreen";
-import { DashboardScreen } from "./components/DashboardScreenComplete";
-import { PublicProfileScreen } from "./components/PublicProfileScreen";
-import { useState } from "react";
-
-type Screen = "landing" | "auth" | "dashboard" | "public";
+import { useNavigate } from "react-router-dom";
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>("landing");
-
-  if (currentScreen === "auth") {
-    return (
-      <AuthScreen 
-        onBack={() => setCurrentScreen("landing")}
-        onSuccess={() => setCurrentScreen("dashboard")}
-      />
-    );
-  }
-
-  if (currentScreen === "dashboard") {
-    return (
-      <DashboardScreen 
-        onBack={() => setCurrentScreen("landing")}
-        onViewPublic={() => setCurrentScreen("public")}
-      />
-    );
-  }
-
-  if (currentScreen === "public") {
-    return <PublicProfileScreen onBack={() => setCurrentScreen("dashboard")} />;
-  }
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen">
-      <SweetHubHeader onLoginClick={() => setCurrentScreen("auth")} />
+      {/* Header con botón de login */}
+      <SweetHubHeader onLoginClick={() => navigate("/auth")} />
+
       <main>
-        <SweetHubHero onGetStarted={() => setCurrentScreen("auth")} />
+        {/* Hero con CTA para ir a auth */}
+        <SweetHubHero onGetStarted={() => navigate("/auth")} />
+
         <SweetHubSteps />
         <SweetHubFeatures />
         <SweetHubTestimonials />
         <SweetHubFAQ />
-        <SweetHubCTA onGetStarted={() => setCurrentScreen("auth")} />
+        
+        {/* CTA al final del landing */}
+        <SweetHubCTA onGetStarted={() => navigate("/auth")} />
       </main>
+
       <SweetHubFooter />
     </div>
   );

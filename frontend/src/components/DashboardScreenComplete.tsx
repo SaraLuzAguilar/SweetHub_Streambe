@@ -1027,6 +1027,7 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                   </div>
                 </Card>
 
+
                 <Card className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-8">
                   <div className="flex items-center gap-3 mb-6">
                     <div className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${profileData.selectedColor.gradient} flex items-center justify-center`}>
@@ -1042,7 +1043,7 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                       </div>
                       <Switch
                         checked={settings.notifications}
-                        onCheckedChange={(checked) => setSettings({ ...settings, notifications: checked })}
+                        onCheckedChange={(checked: boolean) => setSettings({ ...settings, notifications: checked })}
                       />
                     </div>
                     <div className="flex items-center justify-between p-4 bg-gradient-to-br from-pink-50 to-orange-50 rounded-2xl">
@@ -1052,7 +1053,7 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                       </div>
                       <Switch
                         checked={settings.emailNotifications}
-                        onCheckedChange={(checked) => setSettings({ ...settings, emailNotifications: checked })}
+                        onCheckedChange={(checked:boolean) => setSettings({ ...settings, emailNotifications: checked })}
                       />
                     </div>
                     <div className="flex items-center justify-between p-4 bg-gradient-to-br from-pink-50 to-orange-50 rounded-2xl">
@@ -1062,7 +1063,7 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                       </div>
                       <Switch
                         checked={settings.profileVisibility}
-                        onCheckedChange={(checked) => setSettings({ ...settings, profileVisibility: checked })}
+                        onCheckedChange={(checked: boolean) => setSettings({ ...settings, profileVisibility: checked })}
                       />
                     </div>
                   </div>
