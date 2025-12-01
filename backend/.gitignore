@@ -1,5 +1,21 @@
-node_modules
-# Keep environment variables out of version control
-.env
+# Node
+node_modules/
 
-/src/generated/prisma
+# Environment
+.env
+.env.*
+
+# Build
+dist/
+build/
+
+# Prisma client generated
+src/generated/prisma/
+prisma/generated/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
