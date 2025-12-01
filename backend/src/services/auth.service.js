@@ -4,9 +4,21 @@ import jwt from "jsonwebtoken";
 
 export const authService = {
   register: async (data) => {
-    const { nombre, email, password } = data;
+    const { 
+      businessName, 
+      firstName, 
+      lastName, 
+      dni, 
+      email, 
+      password 
+    } = data;
 
-    // ¿El correo ya existe?
+    // Validaciones básicas
+    if (!businessName || !firstName || !lastName || !dni || !email || !password) {
+      throw new Error("Faltan campos obligatorios");
+    }
+
+    // Verificar si ya existe
     const existing = await prisma.user.findUnique({
       where: { email },
     });
@@ -21,13 +33,26 @@ export const authService = {
     // Crear usuario
     const user = await prisma.user.create({
       data: {
-        nombre,
+        businessName,
+        firstName,
+        lastName,
+        dni,
         email,
         password: hashedPassword,
       },
     });
 
-    return user;
+    // Crear token
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Quitar password
+    const { password: _, ...safeUser } = user;
+
+    return { user: safeUser, token };
   },
 
   login: async ({ email, password }) => {
@@ -45,16 +70,15 @@ export const authService = {
       throw new Error("Credenciales inválidas");
     }
 
-    // Crear token JWT
+    // Token
     const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-      },
+      { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    return { user, token };
+    const { password: _, ...safeUser } = user;
+
+    return { user: safeUser, token };
   },
 };

@@ -36,8 +36,9 @@ const handleRegister = async () => {
   if (!acceptTerms) return;
 
   const data = {
-    nombre: `${firstName} ${lastName}`,   // 👈 Nombre completo requerido por el backend
     businessName,
+    firstName,
+    lastName,
     dni,
     email: registerEmail,
     password: registerPassword,
@@ -46,6 +47,8 @@ const handleRegister = async () => {
   const ok = await register(data);
   if (ok) navigate("/dashboard");
 };
+
+
 
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-pink-50 via-orange-50 to-yellow-50">

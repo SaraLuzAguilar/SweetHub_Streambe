@@ -16,21 +16,23 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `user`
+-- Table structure for table `_prisma_migrations`
 --
 
-DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `_prisma_migrations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `User_email_key` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `_prisma_migrations` (
+  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `checksum` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `finished_at` datetime(3) DEFAULT NULL,
+  `migration_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `logs` text COLLATE utf8mb4_unicode_ci,
+  `rolled_back_at` datetime(3) DEFAULT NULL,
+  `started_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `applied_steps_count` int unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -42,4 +44,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-30 20:05:02
+-- Dump completed on 2025-12-01 16:32:30

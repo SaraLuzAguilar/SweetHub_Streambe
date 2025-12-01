@@ -2,12 +2,18 @@ import { createContext, useContext, useState, ReactNode, useEffect } from "react
 
 type User = {
   id: number;
+  businessName: string;
+  firstName: string;
+  lastName: string;
+  dni: string;
   email: string;
-  nombre: string; // coincide con tu base de datos
 };
 
-type RegisterPayload = {
-  nombre: string;     // <-- único campo que necesita tu backend
+export type RegisterPayload = {
+  businessName: string;
+  firstName: string;
+  lastName: string;
+  dni: string;
   email: string;
   password: string;
 };
@@ -28,7 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Restaurar sesión si hay token guardado
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
@@ -107,7 +112,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, error, login, register, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
