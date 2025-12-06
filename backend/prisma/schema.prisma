@@ -22,5 +22,83 @@ model User {
   email        String   @unique
   password     String
   createdAt    DateTime @default(now())
+ 
+ 
+  // relaciones
+  sections       Section[] // secciones creadas por este usuario
+  products       Product[] // productos creados por este usuario (opcional)
+  medias         Media[]   // uploads del usuario
+
+// -- NUEVA RELACIÓN--
+  businessProfile BusinessProfile? // Usamos '?' porque un usuario recién creado quizás aún no tenga un perfil de negocio.
 }
 
+model Section {
+  id         Int      @id @default(autoincrement())
+  name       String
+  color      String?  // tailwind gradient class o hex
+  icon       String?  // emoji o string
+  createdAt  DateTime @default(now())
+
+  ownerId    Int
+  owner      User     @relation(fields: [ownerId], references: [id])
+
+  products   Product[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Int   
+  unit        String?  // "kg", "unidad", "gr"
+  description String?
+  imageUrl    String?  // ruta pública -> /uploads/...
+  createdAt   DateTime @default(now())
+
+  sectionId   Int
+  section     Section  @relation(fields: [sectionId], references: [id])
+
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id])
+}
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  filename  String
+  path      String   // ruta relativa (ej: /uploads/abc.jpg)
+  mime      String?
+  ownerId   Int
+  owner     User     @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model BusinessProfile {
+  // Datos principales
+  id              Int      @id @default(autoincrement())
+  
+  // Relación 1:1 con el Usuario
+  userId          Int      @unique // Asegura que solo hay UN perfil por usuario
+  user            User     @relation(fields: [userId], references: [id])
+
+  // Campos de Información Básica (los que editas en el panel)
+  // NOTA: 'businessName' ya está en la tabla 'User', lo actualizaremos ahí.
+  slogan          String?  @db.Text
+  category        String?  @db.VarChar(100)
+  location        String?  @db.VarChar(255)
+  
+  // Contacto
+  instagram       String?  @db.VarChar(255)
+  whatsapp        String?  @db.VarChar(50)
+  phone           String?  @db.VarChar(50)
+
+  // URLs de Imágenes (usaremos String, asumiendo que son URLs externas o rutas públicas)
+  coverImageUrl   String?  @db.VarChar(255)
+  profileImageUrl String?  @db.VarChar(255)
+
+  // Opciones de Diseño
+  design_color    String?  @default("#FFFFFF") @db.VarChar(50)
+  design_font     String?  @default("sans-serif") @db.VarChar(100)
+  design_layout   String?  @default("simple") @db.VarChar(50)
+
+  @@map("emprendimientos") // El nombre real de la tabla en MySQL
+}

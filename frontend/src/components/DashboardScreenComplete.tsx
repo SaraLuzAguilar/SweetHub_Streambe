@@ -603,6 +603,15 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                         ))}
                       </TabsContent>
 
+
+
+
+
+
+
+
+
+
                       <TabsContent value="fonts" className="space-y-2">
                         {fontPresets.map((preset, index) => (
                           <button

@@ -16,13 +16,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Dumping data for table `user`
+-- Dumping data for table `media`
 --
 
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'juanPérez','$2a$10$VBOe/ax3Vbyet5Wu/cdqCO/SYeEGpjU77H8xCiuRXUYKBmfbK9Xty','2025-12-01 16:34:36.799','JuanPostres','12345678','Juan','Pérez'),(2,'juanperez@gmail.com','$2a$10$bTGGg2RV/G.SViVdNeMYw.cRF11Zebp8jnVAehHqVXSnsf594rxcG','2025-12-01 17:34:44.263','Dulce Momento','47429971','Juan','Pérez');
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+LOCK TABLES `media` WRITE;
+/*!40000 ALTER TABLE `media` DISABLE KEYS */;
+/*!40000 ALTER TABLE `media` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -34,4 +33,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-02  0:46:47
+-- Dump completed on 2025-12-02  0:46:48

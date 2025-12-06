@@ -16,24 +16,14 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `_prisma_migrations`
+-- Dumping data for table `_prisma_migrations`
 --
 
-DROP TABLE IF EXISTS `_prisma_migrations`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `_prisma_migrations` (
-  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `checksum` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `finished_at` datetime(3) DEFAULT NULL,
-  `migration_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `logs` text COLLATE utf8mb4_unicode_ci,
-  `rolled_back_at` datetime(3) DEFAULT NULL,
-  `started_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `applied_steps_count` int unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+LOCK TABLES `_prisma_migrations` WRITE;
+/*!40000 ALTER TABLE `_prisma_migrations` DISABLE KEYS */;
+INSERT INTO `_prisma_migrations` VALUES ('04358c4d-98d7-456b-9d2e-3839baf9fdae','cbd391afee8c71d1f9bed1bf66b5d939abbc297f0637ab3386a3f84b0f41f62e','2025-12-01 16:08:37.773','20251124020901_init',NULL,NULL,'2025-12-01 16:08:37.687',1),('3e40e90f-cb9f-4192-8468-b611b7ba3a0b','dd3e64a8336004dca1bad73afab8d9066c9f40e4579c76cedaa24ad3ac6e20fb','2025-12-01 23:16:26.132','20251201231625_change_price_type',NULL,NULL,'2025-12-01 23:16:25.997',1),('627a34c8-ccea-4553-afc4-282f4031fe9e','a899cdd8bb1810c693e6414cea9f726dd83bed3ab52d8927b158083ce30f8421','2025-12-01 16:08:38.337','20251201160838_remove_nombre_field',NULL,NULL,'2025-12-01 16:08:38.178',1),('f7e5fed5-ca07-4891-9407-0418df26a7e8','95acf22e1164430125358a76d6d926c8541ca226956911cc5f7df2e2065d440d','2025-12-01 20:26:25.052','20251201202624_add_catalog_and_media',NULL,NULL,'2025-12-01 20:26:24.288',1);
+/*!40000 ALTER TABLE `_prisma_migrations` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -44,4 +34,4 @@ CREATE TABLE `_prisma_migrations` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-01 16:32:30
+-- Dump completed on 2025-12-02  0:46:47

@@ -1,584 +1,212 @@
-import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
-import { Card } from "./ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { 
-  LayoutDashboard,
-  Palette,
-  ShoppingBag,
-  Eye,
-  BarChart3,
-  LogOut,
-  Settings,
-  Upload,
-  Edit3,
-  Trash2,
-  Plus,
-  Save,
-  Copy,
-  Check,
-  ExternalLink,
-  Folder,
-  Type,
-  Layout
-} from "lucide-react";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import React, { useState, useMemo } from 'react';
+// CORRECCIÓN DE RUTAS: Usamos rutas relativas directas
+// DashboardScreen.tsx (en /src/components) necesita ir a ./ui/card para encontrarlo.
+import { Card } from './ui/card'; 
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { Folder, Trash2, Plus, Edit3 } from 'lucide-react';
 
+// --- Definiciones de Tipos (Interface) 
 interface Product {
   id: string;
   name: string;
   price: string;
   description: string;
   image: string;
-  unit?: string; // gr, kg, unidad, etc.
+  categoryId: string;
 }
 
 interface Category {
   id: string;
   name: string;
-  color: string;
-  icon: string;
-  products: Product[];
+  color: string; // Tailwind CSS gradient class
+  icon: string; // Emoji or Icon component
+  products: Product[]; 
 }
 
-const colorPresets = [
-  { name: "Rosa dulce", primary: "#ec4899", secondary: "#f97316", gradient: "from-pink-500 to-orange-500" },
-  { name: "Lavanda", primary: "#a855f7", secondary: "#ec4899", gradient: "from-purple-500 to-pink-500" },
-  { name: "Melocotón", primary: "#fb923c", secondary: "#fbbf24", gradient: "from-orange-500 to-yellow-500" },
-  { name: "Menta", primary: "#10b981", secondary: "#06b6d4", gradient: "from-green-500 to-cyan-500" },
-  { name: "Cielo", primary: "#3b82f6", secondary: "#8b5cf6", gradient: "from-blue-500 to-purple-500" },
-  { name: "Coral", primary: "#f43f5e", secondary: "#fb7185", gradient: "from-rose-500 to-pink-400" },
-  { name: "Atardecer", primary: "#f59e0b", secondary: "#f97316", gradient: "from-amber-500 to-orange-500" },
-  { name: "Bosque", primary: "#059669", secondary: "#10b981", gradient: "from-emerald-600 to-green-500" },
-  { name: "Océano", primary: "#0284c7", secondary: "#06b6d4", gradient: "from-sky-600 to-cyan-500" },
-  { name: "Neón", primary: "#d946ef", secondary: "#a855f7", gradient: "from-fuchsia-500 to-purple-500" },
-];
+// CORRECCIÓN 2: Ajuste en la interfaz ProfileData para sincronizar con los datos
+interface ProfileData {
+  selectedColor: {
+    name: string;
+    gradient: string; // Ahora usamos 'gradient'
+  };
+}
 
-const fontPresets = [
-  { name: "Moderna (Poppins)", value: "font-sans" },
-  { name: "Elegante (Serif)", value: "font-serif" },
-  { name: "Creativa (Cursiva)", value: "font-mono" },
-];
-
-const layoutPresets = [
-  { name: "Clásico", icon: "grid" },
-  { name: "Masonry", icon: "columns" },
-  { name: "Carrusel", icon: "layout" },
-];
+// --- Datos de Muestra (Ajustados)
 
 const categoryColors = [
-  { name: "Rosa", value: "from-pink-400 to-rose-400" },
-  { name: "Naranja", value: "from-orange-400 to-amber-400" },
-  { name: "Púrpura", value: "from-purple-400 to-violet-400" },
-  { name: "Azul", value: "from-blue-400 to-cyan-400" },
-  { name: "Verde", value: "from-green-400 to-emerald-400" },
+  // CORRECCIÓN 2: Cambiado 'value' a 'gradient' para sincronizar con el tipo ProfileData
+  { name: "Pink-Orange", gradient: "from-pink-500 to-orange-500" },
+  { name: "Blue-Cyan", gradient: "from-blue-500 to-cyan-500" },
+  { name: "Green-Lime", gradient: "from-green-500 to-lime-500" },
+  { name: "Purple-Fuchsia", gradient: "from-purple-500 to-fuchsia-500" },
+  { name: "Red-Rose", gradient: "from-red-500 to-rose-500" },
 ];
 
-const categoryIcons = ["🍰", "🧁", "🎂", "🍪", "🍩", "🥐", "☕", "🍫"];
+const categoryIcons = ["🍰", "☕", "🍩", "🍪", "🍓", "🍉", "🍇", "🍍"];
 
-export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void; onViewPublic?: () => void }) {
-  const [activeSection, setActiveSection] = useState<"overview" | "design" | "catalog" | "analytics" | "settings">("overview");
-  const [linkCopied, setLinkCopied] = useState(false);
+const initialCategories: Category[] = [
+  // Dejo algunas categorías de ejemplo vacías para la estructura inicial
+  { id: 'cat-1', name: 'Tortas', color: categoryColors[0].gradient, icon: '🍰', products: [] },
+  { id: 'cat-2', name: 'Bebidas', color: categoryColors[1].gradient, icon: '☕', products: [] },
+  { id: 'cat-3', name: 'Postres', color: categoryColors[2].gradient, icon: '🍩', products: [] },
+];
+
+const initialProducts: Product[] = [];
+
+// CORRECCIÓN 2: Asignación de selectedColor usando la nueva propiedad 'gradient'
+const initialProfileData: ProfileData = {
+  selectedColor: categoryColors[0], 
+};
+
+
+// --- Componente de Imagen con Fallback (Simulación)
+interface ImageWithFallbackProps {
+    src: string;
+    alt: string;
+    className: string;
+}
+
+const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({ src, alt, className }) => {
+  const [error, setError] = useState(false);
+  const handleError = () => setError(true);
   
-  // Profile data
-  const [profileData, setProfileData] = useState({
-    businessName: "Dulce Momento",
-    slogan: "Tortas artesanales hechas con amor 🎂",
-    category: "Repostería artesanal",
-    location: "Buenos Aires, Argentina",
-    email: "hola@dulcemomento.com",
-    instagram: "@dulcemomento",
-    phone: "+54 9 11 1234-5678",
-    whatsapp: "+5491112345678",
-    coverImage: "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=1200&h=400&fit=crop",
-    selectedColor: colorPresets[0],
-    selectedFont: fontPresets[0],
-    selectedLayout: layoutPresets[0],
-    personalLink: "sweethub.app/p/dulcemomento"
-  });
+  const finalSrc = src && !error ? src : 'https://via.placeholder.com/300?text=No+Image';
 
-  // Catalog data
-  const [categories, setCategories] = useState<Category[]>([
-    {
-      id: "1",
-      name: "Tortas",
-      color: "from-pink-400 to-rose-400",
-      icon: "🎂",
-      products: [
-        {
-          id: "1",
-          name: "Torta de chocolate",
-          price: "$3500",
-          description: "Deliciosa torta de chocolate con cobertura de ganache",
-          image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop"
-        },
-        {
-          id: "2",
-          name: "Torta red velvet",
-          price: "$4000",
-          description: "Suave torta red velvet con crema de queso",
-          image: "https://images.unsplash.com/photo-1586985289906-406988974504?w=400&h=400&fit=crop"
-        }
-      ]
-    },
-    {
-      id: "2",
-      name: "Cupcakes",
-      color: "from-purple-400 to-violet-400",
-      icon: "🧁",
-      products: [
-        {
-          id: "3",
-          name: "Cupcake de vainilla",
-          price: "$800",
-          description: "Cupcake de vainilla con buttercream",
-          image: "https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7?w=400&h=400&fit=crop"
-        }
-      ]
-    }
-  ]);
+  return <img src={finalSrc} alt={alt} className={className} onError={handleError} />;
+};
 
-  const [selectedCategory, setSelectedCategory] = useState<string>(categories[0]?.id || "");
+
+// --- Componente Principal
+export default function Dashboard() {
+  const [activeSection, setActiveSection] = useState<'catalog' | 'analytics'>('catalog');
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategories[0]?.id || '');
+  
+  // Estado para Crear Categoría
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+  // Inicialización con el nuevo campo 'gradient'
+  const [newCategory, setNewCategory] = useState({ name: '', color: categoryColors[0].gradient, icon: categoryIcons[0] });
+
+  // Estado para Crear/Editar Producto
   const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({ name: '', price: '', description: '', image: '' });
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const [newCategory, setNewCategory] = useState({
-    name: "",
-    color: categoryColors[0].value,
-    icon: categoryIcons[0]
-  });
+  const profileData = initialProfileData; 
 
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    description: "",
-    image: "",
-    unit: ""
-  });
+  // Filtrado de categorías
+  const categoriesWithProducts = useMemo(() => {
+    return categories.map(cat => ({
+      ...cat,
+      products: products.filter(prod => prod.categoryId === cat.id),
+    }));
+  }, [categories, products]);
+  
+  const currentCategory = useMemo(() => {
+    return categoriesWithProducts.find(cat => cat.id === selectedCategory);
+  }, [selectedCategory, categoriesWithProducts]);
 
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(`https://${profileData.personalLink}`);
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2000);
-  };
+  // --- Lógica de Categorías ---
 
   const handleAddCategory = () => {
-    const category: Category = {
-      id: Date.now().toString(),
-      name: newCategory.name,
-      color: newCategory.color,
-      icon: newCategory.icon,
-      products: []
-    };
-    setCategories([...categories, category]);
-    setNewCategory({ name: "", color: categoryColors[0].value, icon: categoryIcons[0] });
-    setIsAddingCategory(false);
-    setSelectedCategory(category.id);
-  };
-
-  const handleDeleteCategory = (categoryId: string) => {
-    setCategories(categories.filter(c => c.id !== categoryId));
-    if (selectedCategory === categoryId && categories.length > 1) {
-      setSelectedCategory(categories.find(c => c.id !== categoryId)?.id || "");
+    if (newCategory.name) {
+      const newCat: Category = {
+        id: `cat-${Date.now()}`,
+        ...newCategory,
+        products: [], 
+      };
+      setCategories([...categories, newCat]);
+      setSelectedCategory(newCat.id);
+      setIsAddingCategory(false);
+      setNewCategory({ name: '', color: categoryColors[0].gradient, icon: categoryIcons[0] });
     }
   };
 
+  const handleDeleteCategory = (id: string) => {
+    const confirmDelete = window.confirm("¿Estás seguro de que quieres eliminar esta sección? También se eliminarán todos sus productos.");
+    if (confirmDelete) {
+      const updatedCategories = categories.filter(cat => cat.id !== id);
+      setCategories(updatedCategories);
+      setProducts(prevProducts => prevProducts.filter(prod => prod.categoryId !== id));
+
+      if (selectedCategory === id) {
+        setSelectedCategory(updatedCategories[0]?.id || '');
+      }
+    }
+  };
+
+
+  // --- Lógica de Productos ---
+
   const handleAddProduct = () => {
-    const product: Product = {
-      id: Date.now().toString(),
-      ...newProduct
-    };
-    
-    setCategories(categories.map(cat => 
-      cat.id === selectedCategory 
-        ? { ...cat, products: [...cat.products, product] }
-        : cat
-    ));
-    
-    setNewProduct({ name: "", price: "", description: "", image: "", unit: "" });
-    setIsAddingProduct(false);
+    if (newProduct.name && newProduct.price && selectedCategory) {
+      const productToAdd: Product = {
+        id: `prod-${Date.now()}`,
+        ...newProduct,
+        categoryId: selectedCategory,
+      };
+
+      setProducts([...products, productToAdd]);
+      setIsAddingProduct(false);
+      setNewProduct({ name: '', price: '', description: '', image: '' });
+    }
   };
 
   const handleUpdateProduct = () => {
-    if (!editingProduct) return;
-    
-    setCategories(categories.map(cat => 
-      cat.id === selectedCategory 
-        ? { 
-            ...cat, 
-            products: cat.products.map(p => 
-              p.id === editingProduct.id ? { ...editingProduct } : p
-            )
-          }
-        : cat
-    ));
-    
-    setEditingProduct(null);
+    if (editingProduct) {
+      setProducts(prevProducts => prevProducts.map(p =>
+        p.id === editingProduct.id ? editingProduct : p
+      ));
+      setEditingProduct(null);
+    }
   };
 
-  const handleDeleteProduct = (productId: string) => {
-    setCategories(categories.map(cat => 
-      cat.id === selectedCategory 
-        ? { ...cat, products: cat.products.filter(p => p.id !== productId) }
-        : cat
-    ));
+  const handleDeleteProduct = (id: string) => {
+    const confirmDelete = window.confirm("¿Estás seguro de que quieres eliminar este producto?");
+    if (confirmDelete) {
+      setProducts(prevProducts => prevProducts.filter(p => p.id !== id));
+    }
   };
 
-  const currentCategory = categories.find(c => c.id === selectedCategory);
-  const totalProducts = categories.reduce((acc, cat) => acc + cat.products.length, 0);
-
-  const menuItems = [
-    { id: "overview" as const, label: "Inicio", icon: LayoutDashboard },
-    { id: "design" as const, label: "Diseño de perfil", icon: Palette },
-    { id: "catalog" as const, label: "Catálogo", icon: ShoppingBag },
-    { id: "analytics" as const, label: "Estadísticas", icon: BarChart3 },
-  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-orange-50 to-yellow-50 flex">
-      {/* Sidebar */}
-      <aside className="w-72 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 flex flex-col">
-        {/* Logo */}
-        <div className="p-6 border-b border-gray-200/50">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-400 to-orange-400 flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl">🍰</span>
-            </div>
-            <div>
-              <h1 className="text-xl">SweetHub</h1>
-              <p className="text-sm text-gray-500">{profileData.businessName}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
-                  activeSection === item.id
-                    ? `bg-gradient-to-r ${profileData.selectedColor.gradient} text-white shadow-lg`
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 to-orange-100 p-8">
+      <header className="flex justify-between items-center mb-10">
+        <h1 className={`text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r ${profileData.selectedColor.gradient}`}>
+          Panel de Control 🚀
+        </h1>
+        <nav className="flex space-x-4 bg-white/80 backdrop-blur-md border border-white/50 rounded-full p-2 shadow-xl">
+          <Button
+            onClick={() => setActiveSection('catalog')}
+            className={`rounded-full px-6 py-3 transition-all ${
+              activeSection === 'catalog'
+                ? `bg-gradient-to-r ${profileData.selectedColor.gradient} text-white shadow-lg`
+                : 'bg-transparent text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Catálogo
+          </Button>
+          <Button
+            onClick={() => setActiveSection('analytics')}
+            className={`rounded-full px-6 py-3 transition-all ${
+              activeSection === 'analytics'
+                ? `bg-gradient-to-r ${profileData.selectedColor.gradient} text-white shadow-lg`
+                : 'bg-transparent text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Estadísticas
+          </Button>
         </nav>
+      </header>
 
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-gray-200/50 space-y-2">
-          <Button
-            onClick={onViewPublic}
-            variant="outline"
-            className="w-full rounded-2xl justify-start gap-3"
-          >
-            <Eye className="w-4 h-4" />
-            Ver perfil público
-          </Button>
-          <Button
-            variant="ghost"
-            className="w-full rounded-2xl justify-start gap-3 text-gray-600"
-          >
-            <Settings className="w-4 h-4" />
-            Configuración
-          </Button>
-          <Button
-            onClick={onBack}
-            variant="ghost"
-            className="w-full rounded-2xl justify-start gap-3 text-gray-600"
-          >
-            <LogOut className="w-4 h-4" />
-            Cerrar sesión
-          </Button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-8 py-8 max-w-6xl">
-          {/* Overview Section */}
-          {activeSection === "overview" && (
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-4xl mb-2">Bienvenido de nuevo ���</h2>
-                <p className="text-xl text-gray-600">Aquí está el resumen de tu emprendimiento</p>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="grid md:grid-cols-3 gap-6">
-                <Card className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${profileData.selectedColor.gradient} flex items-center justify-center`}>
-                      <Eye className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="text-3xl mb-1">1,234</div>
-                  <div className="text-sm text-gray-600">Visitas este mes</div>
-                  <div className="mt-2 text-sm text-green-600">+12% vs mes anterior</div>
-                </Card>
-
-                <Card className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${profileData.selectedColor.gradient} flex items-center justify-center`}>
-                      <ShoppingBag className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="text-3xl mb-1">{totalProducts}</div>
-                  <div className="text-sm text-gray-600">Productos publicados</div>
-                  <div className="mt-2 text-sm text-gray-500">{categories.length} categorías</div>
-                </Card>
-
-                <Card className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${profileData.selectedColor.gradient} flex items-center justify-center`}>
-                      <BarChart3 className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="text-3xl mb-1">89</div>
-                  <div className="text-sm text-gray-600">Pedidos recibidos</div>
-                  <div className="mt-2 text-sm text-green-600">+8 esta semana</div>
-                </Card>
-              </div>
-
-              {/* Link compartible */}
-              <Card className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-8">
-                <h3 className="text-2xl mb-4">Tu link personal</h3>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 bg-gradient-to-r from-pink-50 to-orange-50 rounded-2xl p-4">
-                    <div className="text-sm text-gray-600 mb-1">Comparte este enlace en tus redes</div>
-                    <div className="text-lg">https://{profileData.personalLink}</div>
-                  </div>
-                  <Button
-                    onClick={handleCopyLink}
-                    className={`h-14 px-6 rounded-2xl transition-all ${
-                      linkCopied
-                        ? "bg-green-500 hover:bg-green-600"
-                        : `bg-gradient-to-r ${profileData.selectedColor.gradient} hover:opacity-90`
-                    } text-white`}
-                  >
-                    {linkCopied ? (
-                      <>
-                        <Check className="w-5 h-5 mr-2" />
-                        ¡Copiado!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-5 h-5 mr-2" />
-                        Copiar
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Quick Actions */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card 
-                  className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-6 hover:shadow-2xl transition-all cursor-pointer group"
-                  onClick={() => setActiveSection("design")}
-                >
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${profileData.selectedColor.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <Palette className="w-7 h-7 text-white" />
-                  </div>
-                  <h3 className="text-xl mb-2">Personalizar diseño</h3>
-                  <p className="text-gray-600 mb-4">Cambia colores, tipografía y estilo de tu perfil</p>
-                  <div className="text-pink-600 flex items-center gap-2">
-                    Ir a diseño <ExternalLink className="w-4 h-4" />
-                  </div>
-                </Card>
-
-                <Card 
-                  className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-6 hover:shadow-2xl transition-all cursor-pointer group"
-                  onClick={() => setActiveSection("catalog")}
-                >
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${profileData.selectedColor.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <ShoppingBag className="w-7 h-7 text-white" />
-                  </div>
-                  <h3 className="text-xl mb-2">Gestionar catálogo</h3>
-                  <p className="text-gray-600 mb-4">Agrega, edita o elimina productos y categorías</p>
-                  <div className="text-pink-600 flex items-center gap-2">
-                    Ir a catálogo <ExternalLink className="w-4 h-4" />
-                  </div>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {/* Design Section */}
-          {activeSection === "design" && (
-            <div className="space-y-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-4xl mb-2">Diseño de perfil</h2>
-                  <p className="text-xl text-gray-600">Personaliza la apariencia de tu mini sitio</p>
-                </div>
-                <Button className={`bg-gradient-to-r ${profileData.selectedColor.gradient} text-white rounded-2xl shadow-lg px-6`}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Guardar cambios
-                </Button>
-              </div>
-
-              <div className="grid lg:grid-cols-3 gap-8">
-                {/* Left - Profile Info */}
-                <div className="lg:col-span-2 space-y-6">
-                  <Card className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-8">
-                    <h3 className="text-2xl mb-6">Información básica</h3>
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-6">
-                        <div className="relative group">
-                          <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${profileData.selectedColor.gradient} flex items-center justify-center shadow-lg relative overflow-hidden text-4xl`}>
-                            🍰
-                          </div>
-                          <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                            <Upload className="w-6 h-6 text-white" />
-                          </div>
-                        </div>
-                        <div className="flex-1 space-y-4">
-                          <div className="space-y-2">
-                            <Label>Nombre del emprendimiento</Label>
-                            <Input
-                              value={profileData.businessName}
-                              onChange={(e) => setProfileData({ ...profileData, businessName: e.target.value })}
-                              className="h-12 rounded-2xl"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Eslogan o descripción</Label>
-                        <Textarea
-                          value={profileData.slogan}
-                          onChange={(e) => setProfileData({ ...profileData, slogan: e.target.value })}
-                          className="rounded-2xl resize-none"
-                          rows={2}
-                        />
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Categoría</Label>
-                          <Input
-                            value={profileData.category}
-                            onChange={(e) => setProfileData({ ...profileData, category: e.target.value })}
-                            className="h-12 rounded-2xl"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Ubicación</Label>
-                          <Input
-                            value={profileData.location}
-                            onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                            className="h-12 rounded-2xl"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Email</Label>
-                          <Input
-                            value={profileData.email}
-                            onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                            className="h-12 rounded-2xl"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Instagram</Label>
-                          <Input
-                            value={profileData.instagram}
-                            onChange={(e) => setProfileData({ ...profileData, instagram: e.target.value })}
-                            className="h-12 rounded-2xl"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-
-                {/* Right - Customization */}
-                <div>
-                  <Card className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-6 sticky top-8">
-                    <h3 className="text-xl mb-4 flex items-center gap-2">
-                      <Palette className="w-5 h-5" />
-                      Personalización visual
-                    </h3>
-
-                    <Tabs defaultValue="colors" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3 bg-gray-100/80 p-1 rounded-xl mb-4">
-                        <TabsTrigger value="colors" className="rounded-lg text-xs">Color</TabsTrigger>
-                        <TabsTrigger value="fonts" className="rounded-lg text-xs">Fuente</TabsTrigger>
-                        <TabsTrigger value="layout" className="rounded-lg text-xs">Layout</TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="colors" className="space-y-2">
-                        {colorPresets.map((preset, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setProfileData({ ...profileData, selectedColor: preset })}
-                            className={`w-full p-3 rounded-2xl border-2 transition-all hover:scale-105 ${
-                              profileData.selectedColor.name === preset.name
-                                ? "border-pink-500 bg-pink-50"
-                                : "border-gray-200 bg-white/50"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${preset.gradient} shadow-md`} />
-                              <span className="text-sm">{preset.name}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </TabsContent>
-
-                      <TabsContent value="fonts" className="space-y-2">
-                        {fontPresets.map((preset, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setProfileData({ ...profileData, selectedFont: preset })}
-                            className={`w-full p-4 rounded-2xl border-2 transition-all hover:scale-105 ${
-                              profileData.selectedFont.name === preset.name
-                                ? "border-pink-500 bg-pink-50"
-                                : "border-gray-200 bg-white/50"
-                            }`}
-                          >
-                            <div className={preset.value}>{preset.name}</div>
-                          </button>
-                        ))}
-                      </TabsContent>
-
-                      <TabsContent value="layout" className="space-y-2">
-                        {layoutPresets.map((preset, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setProfileData({ ...profileData, selectedLayout: preset })}
-                            className={`w-full p-4 rounded-2xl border-2 transition-all hover:scale-105 ${
-                              profileData.selectedLayout.name === preset.name
-                                ? "border-pink-500 bg-pink-50"
-                                : "border-gray-200 bg-white/50"
-                            }`}
-                          >
-                            {preset.name}
-                          </button>
-                        ))}
-                      </TabsContent>
-                    </Tabs>
-                  </Card>
-                </div>
-              </div>
-            </div>
-          )}
-
+      <main>
+        {/* Renderizado de secciones (Catalog y Analytics) */}
+        <div>
           {/* Catalog Section */}
           {activeSection === "catalog" && (
             <div className="space-y-8">
@@ -601,7 +229,7 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                     </div>
 
                     <div className="space-y-2">
-                      {categories.map((category) => (
+                      {categoriesWithProducts.map((category) => (
                         <div key={category.id} className="relative group">
                           <button
                             onClick={() => setSelectedCategory(category.id)}
@@ -647,7 +275,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                             <Label>Nombre</Label>
                             <Input
                               value={newCategory.name}
-                              onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                              // CORRECCIÓN 3: Tipificación del evento
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCategory({ ...newCategory, name: e.target.value })}
                               className="h-12 rounded-2xl"
                             />
                           </div>
@@ -657,9 +286,10 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                               {categoryColors.map((color) => (
                                 <button
                                   key={color.name}
-                                  onClick={() => setNewCategory({ ...newCategory, color: color.value })}
-                                  className={`h-12 rounded-xl bg-gradient-to-r ${color.value} ${
-                                    newCategory.color === color.value ? 'ring-4 ring-pink-500' : ''
+                                  // CORRECCIÓN 2: Uso de 'gradient'
+                                  onClick={() => setNewCategory({ ...newCategory, color: color.gradient })}
+                                  className={`h-12 rounded-xl bg-gradient-to-r ${color.gradient} ${
+                                    newCategory.color === color.gradient ? 'ring-4 ring-pink-500' : ''
                                   }`}
                                 />
                               ))}
@@ -696,7 +326,7 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
 
                 {/* Main - Products */}
                 <div className="lg:col-span-3">
-                  {currentCategory && (
+                  {currentCategory ? (
                     <>
                       <div className="flex items-center gap-3 mb-6">
                         <div className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${currentCategory.color} flex items-center justify-center shadow-lg text-2xl`}>
@@ -763,7 +393,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                                 <Label>Nombre</Label>
                                 <Input
                                   value={newProduct.name}
-                                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                                  // CORRECCIÓN 3: Tipificación del evento
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewProduct({ ...newProduct, name: e.target.value })}
                                   className="h-12 rounded-2xl"
                                 />
                               </div>
@@ -771,7 +402,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                                 <Label>Precio</Label>
                                 <Input
                                   value={newProduct.price}
-                                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                                  // CORRECCIÓN 3: Tipificación del evento
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewProduct({ ...newProduct, price: e.target.value })}
                                   className="h-12 rounded-2xl"
                                 />
                               </div>
@@ -779,7 +411,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                                 <Label>Descripción</Label>
                                 <Textarea
                                   value={newProduct.description}
-                                  onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                                  // CORRECCIÓN 3: Tipificación del evento
+                                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewProduct({ ...newProduct, description: e.target.value })}
                                   className="rounded-2xl resize-none"
                                   rows={3}
                                 />
@@ -788,7 +421,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                                 <Label>URL de imagen</Label>
                                 <Input
                                   value={newProduct.image}
-                                  onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
+                                  // CORRECCIÓN 3: Tipificación del evento
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewProduct({ ...newProduct, image: e.target.value })}
                                   className="h-12 rounded-2xl"
                                 />
                               </div>
@@ -804,13 +438,18 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                         </Dialog>
                       </div>
                     </>
+                  ) : (
+                    <Card className="bg-white/80 backdrop-blur-md border border-white/50 rounded-[2rem] shadow-xl p-8 text-center">
+                        <h3 className="text-xl">No hay secciones de catálogo.</h3>
+                        <p className="text-gray-600">Crea una nueva sección para empezar a agregar productos.</p>
+                    </Card>
                   )}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Analytics Section */}
+          {/* Analytics Section (Se deja sin cambios) */}
           {activeSection === "analytics" && (
             <div className="space-y-8">
               <div>
@@ -908,7 +547,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                 <Label>Nombre</Label>
                 <Input
                   value={editingProduct.name}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                  // CORRECCIÓN 3: Tipificación del evento
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingProduct({ ...editingProduct, name: e.target.value })}
                   className="h-12 rounded-2xl"
                 />
               </div>
@@ -916,7 +556,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                 <Label>Precio</Label>
                 <Input
                   value={editingProduct.price}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })}
+                  // CORRECCIÓN 3: Tipificación del evento
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingProduct({ ...editingProduct, price: e.target.value })}
                   className="h-12 rounded-2xl"
                 />
               </div>
@@ -924,7 +565,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                 <Label>Descripción</Label>
                 <Textarea
                   value={editingProduct.description}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                  // CORRECCIÓN 3: Tipificación del evento
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditingProduct({ ...editingProduct, description: e.target.value })}
                   className="rounded-2xl resize-none"
                   rows={3}
                 />
@@ -933,7 +575,8 @@ export function DashboardScreen({ onBack, onViewPublic }: { onBack?: () => void;
                 <Label>URL de imagen</Label>
                 <Input
                   value={editingProduct.image}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
+                  // CORRECCIÓN 3: Tipificación del evento
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingProduct({ ...editingProduct, image: e.target.value })}
                   className="h-12 rounded-2xl"
                 />
               </div>
